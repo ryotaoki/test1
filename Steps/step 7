@@ -1,0 +1,315 @@
+forms and & saving data
+
+go to postscontronller
+
+add
+
+public function create()
+    {
+        return view('posts.create');
+    }
+
+create post/create.blade.php
+go to laravelcollective.com 
+add
+
+@extends('layouts.app')
+
+@section('content')
+
+<h1>create post</h1>
+{!! Form::open(['action' => 'PostsController@store', 'method' => 'POST']) !!}
+    <div class="form-group">
+    {{Form::label('title', 'Title')}}
+    {{Form::text('title', '',['class' => 'form-control', 'placeholder' => 'type the title'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('description', 'Description')}}
+        {{Form::textarea('description', '',['class' => 'form-control', 'placeholder' => 'type the job description'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('salary_hr', 'Salary by Hour')}}
+        {{Form::text('salary_hr', '',['class' => 'form-control', 'placeholder' => 'type salary_hr with number'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('type', 'Type of Job')}}
+        {{Form::text('type', '',['class' => 'form-control', 'placeholder' => 'type of job'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('required_skills', 'Required Skill')}}
+        {{Form::textarea('required_skills', '',['class' => 'form-control', 'placeholder' => 'type required skills'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('company_name', 'Campany Name')}}
+        {{Form::text('company_name', '',['class' => 'form-control', 'placeholder' => 'type company name'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('company_description', 'Campany Description')}}
+        {{Form::textarea('company_description', '',['class' => 'form-control', 'placeholder' => 'type company description'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('city', 'City')}}
+        {{Form::text('city', '',['class' => 'form-control', 'placeholder' => 'type city'])}}
+    </div>
+
+
+        
+
+     {{Form::submit('Submit',['class' => 'btn btn-primary'])}}
+    
+{!! Form::close() !!}
+
+
+
+    
+        
+
+   
+    
+@endsection
+
+
+go to PostsController
+add
+
+    public function store(Request $request)
+    {
+        $this->validate($request,[
+            'title' => 'required',
+            'description' => 'required',
+            'salary_hr' => 'required',
+            'type' => 'required',
+            'required_skills' => 'required',
+            'company_name' => 'required',
+            'company_description' => 'required',
+            'city' => 'required',
+            
+        ]);
+        
+    }
+
+
+create inc/message.blade.php
+add
+
+@if (count($errors)> 0)
+    @foreach ($errors->all() as $error)
+        <div class="alert alert-danger">
+            {{$error}}
+
+        </div>
+    
+    @endforeach
+
+@endif
+
+@if (session('success'))
+    <div class="alert alert-success">
+        {{session('success')}}
+    </div>
+    
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{session('error')}}
+    </div>
+    
+@endif
+
+
+go to layouts/app
+add @include('inc.message')
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {{-- bootstrap  check step step 4--}}
+    <link rel="stylesheet" href="{{asset('css/app.css')}}">
+
+
+    <title>Ryota</title>
+
+        
+        
+
+
+    </head>
+    <body>
+        @include('inc.navbar')
+       
+        <div class="container mt-5 mb-5">
+            @include('inc.message')
+            @yield('content')
+
+        </div>
+        @include('inc.footer')
+        
+      
+    </body>
+</html>
+
+
+go to postscontronller
+go to store function
+
+    public function store(Request $request)
+    {
+        $this->validate($request,[
+            'title' => 'required',
+            'description' => 'required',
+            'salary_hr' => 'required',
+            'type' => 'required',
+            'required_skills' => 'required',
+            'company_name' => 'required',
+            'company_description' => 'required',
+            'city' => 'required',
+            
+        ]);
+        
+        // create Post
+        $post = new Post;
+        $post->title = $request->input('title');
+        $post->description = $request->input('description');
+        // if its integer how to change?
+        $post->salary_hr = $request->input('salary_hr');
+        $post->type = $request->input('type');
+        $post->required_skills = $request->input('required_skills');
+        $post->company_name = $request->input('company_name');
+        $post->company_description = $request->input('company_description');
+        $post->city = $request->input('city');
+        $post->save();
+
+        return redirect('/posts')->with('success', 'Job Post Created');
+
+    }
+
+
+add link on navbar
+
+ <ul class="nav navbar-nav navbar-right">
+        <li><a href="/posts/create">Create Job Post</a></li>
+</ul>
+
+add editor
+go to layouts/app
+add     <script src="https://cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script> in head
+add <script> CKEDITOR.replace( 'editor1' ); </script> in body
+add <script> CKEDITOR.replace( 'editor2' ); </script> in body
+add <script> CKEDITOR.replace( 'editor3' ); </script> in body
+
+
+go to /posts/create
+add in textarea
+    'id'=> 'editor1'
+    'id'=> 'editor2'
+    'id'=> 'editor3'
+
+
+
+
+
+
+
+@extends('layouts.app')
+
+@section('content')
+
+<h1>create post</h1>
+{!! Form::open(['action' => 'PostsController@store', 'method' => 'POST']) !!}
+    <div class="form-group">
+    {{Form::label('title', 'Title')}}
+    {{Form::text('title', '',['class' => 'form-control', 'placeholder' => 'type the title'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('description', 'Description')}}
+        {{Form::textarea('description', '',['id'=> 'editor1', 'class' => 'form-control', 'placeholder' => 'type the job description'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('salary_hr', 'Salary by Hour')}}
+        {{Form::text('salary_hr', '',['class' => 'form-control', 'placeholder' => 'type salary_hr with number'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('type', 'Type of Job')}}
+        {{Form::text('type', '',['class' => 'form-control', 'placeholder' => 'type of job'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('required_skills', 'Required Skill')}}
+        {{Form::textarea('required_skills', '',['id'=> 'editor2','class' => 'form-control', 'placeholder' => 'type required skills'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('company_name', 'Company Name')}}
+        {{Form::text('company_name', '',['class' => 'form-control', 'placeholder' => 'type company name'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('company_description', 'Company Description')}}
+        {{Form::textarea('company_description', '',['id'=> 'editor3','class' => 'form-control', 'placeholder' => 'type company description'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('city', 'City')}}
+        {{Form::text('city', '',['class' => 'form-control', 'placeholder' => 'type city'])}}
+    </div>
+
+
+        
+
+     {{Form::submit('Submit',['class' => 'btn btn-primary'])}}
+    
+{!! Form::close() !!}
+
+
+@endsection
+
+go to /posts/show.blade.php
+
+add 
+    <p>Job Description:{!!$post->description!!}</p>
+    <p>Required Skills{!!$post->required_skills!!}</p>
+    <p>Campany Description:{!!$post->campany_description!!}</p>
+
+
+@extends('layouts.app')
+
+@section('content')
+
+<h1>{{$post->title}}</h1>
+<a href="/posts" class="btn btn-outline-secondary">Back</a>
+<hr>
+<div class="">
+<p>Job Description:{!!$post->description!!}</p>
+<p>Salary/Hr: {{$post->salary_hr}}</p>
+<p>Type/Occupation:{{$post->type}}</p>
+<p>Required Skills{!!$post->required_skills!!}</p>
+<p>Campany Name: {{$post->company_name}}</p>
+<p>Campany Description:{!!$post->campany_description!!}</p>
+<p>City: {{$post->city}}</p>
+<hr>
+<small>Written on {{$post->created_at}}</small>
+
+
+</div>
+
+    
+        
+
+   
+    
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

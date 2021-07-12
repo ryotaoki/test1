@@ -1,0 +1,86 @@
+Search Bar
+
+
+go to navbar add
+
+
+
+          <div>
+            <form action="/search" method="get">
+              <div class="input-group">
+                <input type="search" class="form-control" name="search" id="">
+                <span class="input-group-btn">
+                  <button type="submit" class="btn btn-primary">Search</button>
+
+                </span>
+                
+
+              </div>
+            </form>
+          </div>
+
+
+
+go to Postcontroller
+add
+
+ public function search(Request $request){
+        $search = $request->get('search');
+        $posts = DB::table('posts')->where('name', 'like', '%'.$search.'%')->paginate(5);
+        return view('posts.search')->with('posts',$posts);
+    }
+
+OR 
+
+    public function search(Request $request){
+        $search = $_GET['search'];
+        // $post = DB::table('posts')->where('name', 'like', '%'.$search.'%')->get();
+        // $posts = User::where('name', 'like', '%'.$search.'%')->get();
+        $posts = DB::table('users')->where('name', 'like', '%'.$search.'%')->get();
+
+
+        return view('posts.search')->with('posts', $posts);
+
+
+        
+    }
+
+
+
+
+
+
+go to web route
+add
+
+Route::get('/search', 'PostsController@search');
+
+
+create file
+search.blade.php ar posts
+copy post.index.blade.php
+paste to search.blade.php
+
+
+go to Postcontroller
+edit __construct()
+
+add
+
+use DB;
+
+
+add
+
+        $this->middleware('auth', ['except' => ['index', 'show','search']]);
+
+
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth', ['except' => ['index', 'show','search']]);
+    }

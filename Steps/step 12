@@ -1,0 +1,402 @@
+file uploading & finishing uploading
+
+
+Go to create.blade.php
+add
+
+    {!! Form::open(['action' => 'PostsController@store', 'method' => 'POST', 'enctype' => 'multipart/form-data']) !!}
+
+
+    <div class="form-group">
+            {{Form::file('cover_image')}}
+
+    </div>
+
+@extends('layouts.app')
+
+@section('content')
+
+<h1>create post</h1>
+ {!! Form::open(['action' => 'PostsController@store', 'method' => 'POST', 'enctype' => 'multipart/form-data']) !!}
+
+    <div class="form-group">
+    {{Form::label('title', 'Title')}}
+    {{Form::text('title', '',['class' => 'form-control', 'placeholder' => 'type the title'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('description', 'Description')}}
+        {{Form::textarea('description', '',['id'=> 'editor1', 'class' => 'form-control', 'placeholder' => 'type the job description'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('salary_hr', 'Salary by Hour')}}
+        {{Form::text('salary_hr', '',['class' => 'form-control', 'placeholder' => 'type salary_hr with number'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('type', 'Type of Job')}}
+        {{Form::text('type', '',['class' => 'form-control', 'placeholder' => 'type of job'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('required_skills', 'Required Skill')}}
+        {{Form::textarea('required_skills', '',['id'=> 'editor2','class' => 'form-control', 'placeholder' => 'type required skills'])}}
+     </div>
+     <div class="form-group">
+        {{Form::label('company_name', 'Company Name')}}
+        {{Form::text('company_name', '',['class' => 'form-control', 'placeholder' => 'type company name'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('company_description', 'Company Description')}}
+        {{Form::textarea('company_description', '',['id'=> 'editor3','class' => 'form-control', 'placeholder' => 'type company description'])}}
+    </div>
+    <div class="form-group">
+        {{Form::label('city', 'City')}}
+        {{Form::text('city', '',['class' => 'form-control', 'placeholder' => 'type city'])}}
+    </div>
+    <div class="form-group">
+      {{Form::file('cover_image')}}
+
+    </div>
+
+
+        
+
+     {{Form::submit('Submit',['class' => 'btn btn-primary'])}}
+    
+{!! Form::close() !!}
+
+       
+    
+@endsection
+
+this create add post to cover_image column
+php artisan make:migration add_cover_image_to_posts
+
+go to user_id migration 
+copy from function up and down 
+
+edit 
+  
+  
+  Schema::table('posts', function (Blueprint $table) {
+            $table->string('cover_image');
+        });
+
+   
+   Schema::table('posts', function (Blueprint $table) {
+            $table->dropColumn('cover_image');
+        });      
+
+paste at cover_image database
+paste up and function
+
+run php artisan migrate
+
+go to PostsController
+go to store function 
+
+add 
+   'cover_image' => 'image|nullable|max:1999'
+
+
+
+
+          //Handle File upload
+    if($request->hasFile('cover_image')){
+        // get filename with the extension
+        $filenameWithExt = $request->file('cover_image')->getClientOriginalName();
+        //get just filename 
+        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+        //get just ext
+        $extension = $request->file('cover_image')->getClientOriginalExtension();
+        //Filename to store 
+        $filenameToStore = $filename.'_'.time().'.'.$extension;
+        // upload image
+        $path = $request->file('cover_image')->storeAs('public/cover_images', $filenameToStore);
+
+
+
+    } else {
+        $filenameToStore ='noimage.jpg';
+    }
+
+
+
+    $post->cover_image = $filenameToStore
+
+
+
+
+
+public function store(Request $request)
+    {
+        $this->validate($request,[
+            'title' => 'required',
+            'description' => 'required',
+            'salary_hr' => 'required',
+            'type' => 'required',
+            'required_skills' => 'required',
+            'company_name' => 'required',
+            'company_description' => 'required',
+            'city' => 'required',
+            'cover_image' => 'image|nullable|max:1999',
+            
+        ]);
+
+              //Handle File upload
+        if($request->hasFile('cover_image')){
+        // get filename with the extension
+         $filenameWithExt = $request->file('cover_image')->getClientOriginalName();
+        //get just filename 
+        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+        //get just ext
+        $extension = $request->file('cover_image')->getClientOriginalExtension();
+        //Filename to store 
+        $filenameToStore = $filename.'_'.time().'.'.$extension;
+        // upload image
+        $path = $request->file('cover_image')->storeAs('public/cover_images', $filenameToStore);
+        
+        } else {
+        $filenameToStore ='noimage.jpg';
+        };
+
+        
+        // create Post
+        $post = new Post;
+        $post->title = $request->input('title');
+        $post->description = $request->input('description');
+        $post->user_id =auth()->user()->id;
+        // if its integer how to change?
+        $post->salary_hr = $request->input('salary_hr');
+        $post->type = $request->input('type');
+        $post->required_skills = $request->input('required_skills');
+        $post->company_name = $request->input('company_name');
+        $post->company_description = $request->input('company_description');
+        $post->city = $request->input('city');
+        $post->cover_image = $filenameToStore;
+        $post->save();
+
+        return redirect('/posts')->with('success', 'Job Post Created');
+
+    }
+
+
+
+
+type php artisan storage: link 
+to create store public and resource
+
+go to post/index 
+add
+   
+
+<div class="row">
+       <div class="col-md-4 col-sm-4">
+         <img style= "width:100%" src="/storage/cover_images/{{$post->cover_image}}" alt="">
+       </div>
+       <div class="col-md-8 col-sm-8">
+          {{-- go to this is SHOW api/Function --}}
+            <h3><a href="/posts/{{$post->id}}">{{$post->title}}</a></h3>
+            <small>Written on {{$post->created_at}} by {{$post->user['name']}}</small>
+            <small>Written on {{$post->created_at}} by {{$post->user['email']}}</small>
+       </div>
+</div>   
+
+
+
+@extends('layouts.app')
+
+@section('content')
+
+    <h1>Posts</h1>
+    @if (count($posts)>0)
+        @foreach ($posts as $post)
+            <div class="card, p3, mb-2">
+            <div class="row">
+                <div class="col-md-4 col-sm-4">
+                <img style= "width:50%" src="/storage/cover_images/{{$post->cover_image}}" alt="">
+
+                </div>
+                <div class="col-md-8 col-sm-8">
+                     {{-- go to this is SHOW api/Function --}}
+
+                    <h3><a href="/posts/{{$post->id}}">{{$post->title}}</a></h3>
+                    <small>Written on {{$post->created_at}} by {{$post->user['name']}}</small>
+                    <small>Written on {{$post->created_at}} by {{$post->user['email']}}</small>
+
+
+
+                </div>
+
+            </div>
+            
+
+
+
+            </div>
+            
+            
+        @endforeach
+        {{$posts->links()}}
+
+    @else
+        <p>No Posts found</p>
+
+        
+    @endif
+    
+@endsection
+
+go to posts/show 
+copy
+      <img style= "width:50%" src="/storage/cover_images/{{$post->cover_image}}" alt="">
+
+
+@extends('layouts.app')
+
+@section('content')
+
+<h1>{{$post->title}}</h1>
+<div class="text-center">
+    <img class="" style= "width:50%" src="/storage/cover_images/{{$post->cover_image}}" alt="">
+
+</div>
+<br>
+<a href="/posts" class="btn btn-outline-secondary">Back</a>
+<hr>
+<div class="">
+<p>Job Description:{!!$post->description!!}</p>
+<p>Salary/Hr: {{$post->salary_hr}}</p>
+<p>Type/Occupation:{{$post->type}}</p>
+<p>Required Skills{!!$post->required_skills!!}</p>
+<p>Campany Name: {{$post->company_name}}</p>
+<p>Campany Description:{!!$post->campany_description!!}</p>
+<p>City: {{$post->city}}</p>
+<hr>
+<small>Written on {{$post->created_at}} by {{$post->user->name}}</small>
+<hr>
+@if(!Auth::guest())
+@if(Auth::user()->id == $post->user_id)
+<a href="/posts/{{$post->id}}/edit" class="btn btn-outline-secondary">Edit</a>
+
+{!!Form::open(['action' => ['PostsController@destroy', $post->id], 'method' => 'POST', 'class' => 'float-right' ])!!}
+    {{Form::hidden('_method', 'DELETE')}}
+    {{Form::submit('Delete', ['class' => 'btn btn-danger'])}}
+{!!Form::close()!!}   
+@endif 
+@endif
+
+</div>
+ 
+    
+@endsection
+
+paste this from create to edit
+   {!! Form::open(['action' => ['PostsController@update', $post->id ], 'method' => 'PUT', 'enctype' => 'multipart/form-data' ]) !!}
+
+
+
+   <div class="form-group">
+        {{Form::file('cover_image')}}
+
+    </div>
+go to edit.blade.php    
+and paste
+
+go to postcontroller 
+edit update functiopn function
+copy from store function   
+
+         //Handle File upload
+        if($request->hasFile('cover_image')){
+        // get filename with the extension
+         $filenameWithExt = $request->file('cover_image')->getClientOriginalName();
+        //get just filename 
+        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+        //get just ext
+        $extension = $request->file('cover_image')->getClientOriginalExtension();
+        //Filename to store 
+        $filenameToStore = $filename.'_'.time().'.'.$extension;
+        // upload image
+        $path = $request->file('cover_image')->storeAs('public/cover_images', $filenameToStore);
+        
+        }; 
+
+
+        if($request->hasFile('cover_image')){
+            $post->cover_image =$filenameToStore;    
+
+        }    
+
+
+
+
+
+
+public function update(Request $request, $id)
+    {
+        $this->validate($request,[
+            'title' => 'required',
+            'description' => 'required',
+            'salary_hr' => 'required',
+            'type' => 'required',
+            'required_skills' => 'required',
+            'company_name' => 'required',
+            'company_description' => 'required',
+            'city' => 'required',
+            
+        ]);
+
+              //Handle File upload
+        if($request->hasFile('cover_image')){
+        // get filename with the extension
+         $filenameWithExt = $request->file('cover_image')->getClientOriginalName();
+        //get just filename 
+        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+        //get just ext
+        $extension = $request->file('cover_image')->getClientOriginalExtension();
+        //Filename to store 
+        $filenameToStore = $filename.'_'.time().'.'.$extension;
+        // upload image
+        $path = $request->file('cover_image')->storeAs('public/cover_images', $filenameToStore);
+        
+        };
+        // create Post
+        $post = Post::find($id);
+        $post->title = $request->input('title');
+        $post->description = $request->input('description');
+        // if its integer how to change?
+        $post->salary_hr = $request->input('salary_hr');
+        $post->type = $request->input('type');
+        $post->required_skills = $request->input('required_skills');
+        $post->company_name = $request->input('company_name');
+        $post->company_description = $request->input('company_description');
+        $post->city = $request->input('city');
+        if($request->hasFile('cover_image')){
+            $post->cover_image =$filenameToStore;    
+
+        }    
+
+        $post->save();
+
+        return redirect('/posts')->with('success', 'Job Post Updated');
+
+        
+    }
+
+
+postcontroller 
+edit destory fuction
+add 
+      if($post->cover_image != 'noimage.jpg'){
+        //delete image
+        Storage::delete('public/cover_images/'.$post->cover_image);
+
+
+    }
+
+        use Illuminate\Support\Facades\Storage;
+
+
+get picture add in storge cover_image
+name must be noimage.jpg
+
+

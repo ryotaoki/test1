@@ -1,0 +1,11 @@
+to use bootsrtap on laravel
+
+1. Make Sure in /resources/js/app.js there is a code : require('./bootstrap');
+2. run in your terminal -> composer require laravel/ui "^2.0"
+3 run in your terminal -> php artisan ui bootstrap
+4. terminal -> npm install 
+5. terminal -> npm run dev
+
+
+add nav navbar
+

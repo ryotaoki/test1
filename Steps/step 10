@@ -1,0 +1,165 @@
+Models Relationship
+user and post
+
+1 to many ralation ship
+1 user has many posts
+many posts belongs to user 
+
+go to post.php
+add
+      public function User(){
+        return $this->belongsTo('App/User');
+    }
+
+class Post extends Model
+{
+    protected $table = 'posts';
+
+    public $primaryKey = 'id';
+
+    public $timestanps = true;
+
+    public function user(){
+        return $this->belongsTo('App\User');
+    }
+
+
+}
+
+go to user
+add
+
+
+  public function posts(){
+        return $this->hasMany('App\Post');
+    }
+
+
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public function posts(){
+        return $this->hasMany('App\Post');
+    }
+
+
+} 
+
+
+go to dashBOardcontroller
+add 
+use App\User;
+
+        public function index()
+    {
+        // access to login person id
+        $user_id =auth()->user()->id;
+        $user =User::find($user_id);
+        return view('dashboard')->with('posts',$user->posts);
+        
+
+        if there is morethan one connection 
+        return view('dashboard')->with('posts',$user->posts)->with('posts',$user->posts);
+    }
+    }
+
+
+go to dashboard.blade.php
+add
+
+
+                       @if(count($posts)>0)
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Title</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            @foreach ($posts as $post)
+                            <tr>
+                            <td>{{$post->title}}</td>
+                            <td><a href="/posts/{{$post->id}}/edit" class="btn btn-primary">Edit</a></td>
+                            <td>
+                                {!!Form::open(['action' => ['PostsController@destroy', $post->id], 'method' => 'POST', 'class' => 'float-right' ])!!}
+                                {{Form::hidden('_method', 'DELETE')}}
+                                {{Form::submit('Delete', ['class' => 'btn btn-danger'])}}
+                                {!!Form::close()!!}    
+                            </td>
+                            
+                                {{-- access to post data  user data to email --}}
+                                {{-- {{$post->user['email']}} --}}
+                            </tr>
+
+                         
+                                
+                            @endforeach
+                        </table>    
+                        @else
+                            <p>You have no posts</p>       
+                        @endif     
+    
+
+
+go to posts/index
+
+add 
+            <small>Written on {{$post->created_at}} by {{$post->user->name}}</small>
+
+
+@extends('layouts.app')
+
+@section('content')
+
+    <h1>Posts</h1>
+    @if (count($posts)>0)
+        @foreach ($posts as $post)
+            <div class="card, p3, mb-2">
+            <h3><a href="/posts/{{$post->id}}">{{$post->title}}</a></h3>
+            <small>Written on {{$post->created_at}}</small>
+            <small>Written on {{$post->created_at}} by {{$post->user->name}}</small>
+
+
+
+
+            </div>
+            
+            
+        @endforeach
+        {{$posts->links()}}
+
+    @else
+        <p>No Posts found</p>
+
+        
+    @endif
+    
+@endsection

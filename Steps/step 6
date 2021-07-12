@@ -1,0 +1,147 @@
+go to post model
+add
+  protected $table = 'posts';
+
+    public $primaryKey = 'id';
+
+    public $timestamps = true;
+
+
+go to postscontroller
+add at index()
+ return view('posts.index');
+
+make folider posts/index.blade.php at view 
+
+goto postscontroller
+add use App\post
+what does PostsController access to Post model.
+
+add
+public function index()
+    {
+        $posts = Post::all();
+        return view('posts.index')->with('posts', $posts);
+    }
+
+go to index
+add
+
+@extends('layouts.app')
+
+@section('content')
+
+    <h1>Posts</h1>
+    @if (count($posts)>0)
+        @foreach ($posts as $post)
+            <div class="card, p3, mb-2">
+            <h3><a href="/posts/{{$post->id}}">{{$post->title}}</a></h3>
+
+            <small>Written on {{$post->created_at}}</small>
+
+
+
+            </div>
+            
+            
+        @endforeach
+
+    @else
+        <p>No Posts found</p>
+
+        
+    @endif
+    
+@endsection
+
+go to navbar to add link post
+<li class="nav-item">
+     <a class="nav-link" href="/posts"> Job Posts</a>
+</li>
+
+go to postscontroller
+add 
+public function show($id)
+    {
+        $post = Post::find($id);
+        return view('posts.show')->with('post',$post);
+    }
+
+make show post/show at view
+
+@extends('layouts.app')
+
+@section('content')
+
+<h1>{{$post->title}}</h1>
+<a href="/posts" class="btn btn-outline-secondary">Back</a>
+<hr>
+<div class="">
+<p>Job Description:{{$post->description}}</p>
+<p>Salary/Hr: {{$post->salary_hr}}</p>
+<p>Type/Occupation:{{$post->type}}</p>
+<p>Required Skills{{$post->required_skills}}</p>
+<p>Campany Name: {{$post->company_name}}</p>
+<p>Campany Description:{{$post->campany_description}}</p>
+<p>City: {{$post->city}}</p>
+<hr>
+<small>Written on {{$post->created_at}}</small>
+
+
+</div>
+
+    
+        
+
+   
+    
+@endsection
+
+go to postscontroller
+add
+
+    public function index()
+    {
+        // $posts = Post::all();
+        // $posts = Post::orderBy('id', 'desc')->get();
+        // $posts = Post::orderBy('id', 'desc')->take(5)->get();
+
+        $posts = Post::orderBy('id', 'desc')->paginate(1);
+
+        return view('posts.index')->with('posts', $posts);
+    }
+
+
+
+go to posts/index  add  {{$posts->links()}}
+
+
+@extends('layouts.app')
+
+@section('content')
+
+    <h1>Posts</h1>
+    @if (count($posts)>0)
+        @foreach ($posts as $post)
+            <div class="card, p3, mb-2">
+            <h3><a href="/posts/{{$post->id}}">{{$post->title}}</a></h3>
+            <small>Written on {{$post->created_at}}</small>
+
+
+
+            </div>
+            
+            
+        @endforeach
+        {{$posts->links()}}
+
+    @else
+        <p>No Posts found</p>
+
+        
+    @endif
+    
+@endsection
+
+
+

@@ -1,0 +1,205 @@
+access controll
+
+go to dasboard controller
+
+this controll authentication 
+copy
+    
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+go to postscontroller
+
+paste in top 
+add 
+this show except index pages and show pages
+, ['except' => ['index', 'show']
+
+
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth', ['except' => ['index', 'show']]);
+    }
+
+
+go to show.blade.pho
+to make condition 
+
+@if(!Auth::guest())
+    if guest is NOT auth than true
+    if guest is author false;
+
+@if(Auth::user()->id == $post->user_id)
+    if auth is match with suer
+
+    Post model -> user() -> User post -> user->id
+    post model -> user_id
+
+
+
+
+@if(!Auth::guest())
+@if(Auth::user()->id == $post->user_id)
+<a href="/posts/{{$post->id}}/edit" class="btn btn-outline-secondary">Edit</a>
+
+{!!Form::open(['action' => ['PostsController@destroy', $post->id], 'method' => 'POST', 'class' => 'float-right' ])!!}
+    {{Form::hidden('_method', 'DELETE')}}
+    {{Form::submit('Delete', ['class' => 'btn btn-danger'])}}
+{!!Form::close()!!}   
+@endif 
+@endif    
+
+
+@extends('layouts.app')
+
+@section('content')
+
+<h1>{{$post->title}}</h1>
+<a href="/posts" class="btn btn-outline-secondary">Back</a>
+<hr>
+<div class="">
+<p>Job Description:{!!$post->description!!}</p>
+<p>Salary/Hr: {{$post->salary_hr}}</p>
+<p>Type/Occupation:{{$post->type}}</p>
+<p>Required Skills{!!$post->required_skills!!}</p>
+<p>Campany Name: {{$post->company_name}}</p>
+<p>Campany Description:{!!$post->campany_description!!}</p>
+<p>City: {{$post->city}}</p>
+<hr>
+<small>Written on {{$post->created_at}} by {{$post->user->name}}</small>
+<hr>
+@if(!Auth::guest())
+@if(Auth::user()->id == $post->user_id)
+<a href="/posts/{{$post->id}}/edit" class="btn btn-outline-secondary">Edit</a>
+
+{!!Form::open(['action' => ['PostsController@destroy', $post->id], 'method' => 'POST', 'class' => 'float-right' ])!!}
+    {{Form::hidden('_method', 'DELETE')}}
+    {{Form::submit('Delete', ['class' => 'btn btn-danger'])}}
+{!!Form::close()!!}   
+@endif 
+@endif
+
+</div>
+   
+    
+@endsection
+
+
+go to postscontroller
+
+edit edit function
+      //check for correct user
+        if(auth()->user()->id !== $post->user_id){
+            return redirect('/posts')->with('error','Unauthorized page');
+        }
+
+
+public function edit($id)
+    {
+        $post = Post::find($id);
+        
+        //check for correct user
+        if(auth()->user()->id !== $post->user_id){
+            return redirect('/posts')->with('error','Unauthorized page');
+        }
+        return view('posts.edit')->with('post',$post);
+    }
+
+edit delete function 
+add
+     //check for correct user
+        if(auth()->user()->id !== $post->user_id){
+            return redirect('/posts')->with('error','Unauthorized page';)
+        }
+
+public function destroy($id)
+    {
+        $post = Post::find($id);
+         //check for correct user
+         if(auth()->user()->id !== $post->user_id){
+            return redirect('/posts')->with('error','Unauthorized page');
+        }
+        $post->delete();
+        return redirect('/posts')->with('success', 'Job Post Removed');
+
+
+    }
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @extends('layouts.app')
+
+@section('content')
+
+<h1>{{$post->title}}</h1>
+<a href="/posts" class="btn btn-outline-secondary">Back</a>
+<hr>
+<div class="">
+<p>Job Description:{!!$post->description!!}</p>
+<p>Salary/Hr: {{$post->salary_hr}}</p>
+<p>Type/Occupation:{{$post->type}}</p>
+<p>Required Skills{!!$post->required_skills!!}</p>
+<p>Campany Name: {{$post->company_name}}</p>
+<p>Campany Description:{!!$post->campany_description!!}</p>
+<p>City: {{$post->city}}</p>
+<hr>
+<small>Written on {{$post->created_at}} by {{$post->user->name}}</small>
+<hr>
+@if(!Auth::guest())
+<a href="/posts/{{$post->id}}/edit" class="btn btn-outline-secondary">Edit</a>
+
+{!!Form::open(['action' => ['PostsController@destroy', $post->id], 'method' => 'POST', 'class' => 'float-right' ])!!}
+    {{Form::hidden('_method', 'DELETE')}}
+    {{Form::submit('Delete', ['class' => 'btn btn-danger'])}}
+{!!Form::close()!!}    
+@endif
+
+</div>    
+
+   
+    
+@endsection
+
+
+
+go to 
+
+
+
+    
+
+
+
+
+
+

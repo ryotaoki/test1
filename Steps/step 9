@@ -1,0 +1,370 @@
+User Authentication
+
+copy whole of app.blade.php
+
+run cmd
+
+1.composer require laravel/ui
+2.php artisan ui vue --auth
+this setp is extra 3.npm install
+this step is extra 4.npm run watch
+Then Test login & register.
+
+click yes
+
+go to app.blade.php 
+cut whole nav part 
+go to navbar.blade.php
+paste it bottom
+cut 
+    <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/services">Services</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/posts"> Job Posts</a>
+        </li>
+       
+      
+      </ul>
+
+paste at 
+            <!-- Right Side Of Navbar -->
+
+<nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url('/') }}">
+            {{ config('app.name', 'Laravel') }}
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <!-- Left Side Of Navbar -->
+            <ul class="navbar-nav mr-auto">
+
+            </ul>
+            
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/about">About</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="/services">Services</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="/posts"> Job Posts</a>
+              </li>
+              
+             
+            
+            </ul>
+
+            <!-- Right Side Of Navbar -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Authentication Links -->
+                @guest
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                    </li>
+                    @if (Route::has('register'))
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                        </li>
+                    @endif
+                @else
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ Auth::user()->name }}
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('logout') }}"
+                               onclick="event.preventDefault();
+                                             document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a>
+
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </div>
+                    </li>
+                @endguest
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+go to app.blade.php
+add  previous codes in to new app.blade.php 
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {{-- bootstrap  check step step 4--}}
+    <link rel="stylesheet" href="{{asset('css/app.css')}}">
+    <script src="https://cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script>
+
+
+
+    <title>Ryota</title>
+
+        
+        
+
+
+    </head>
+    <body>
+        @include('inc.navbar')
+        
+        <div class="container mt-5 mb-5">
+            @include('inc.message')
+            @yield('content')
+
+        </div>
+        @include('inc.footer')
+        
+        <script> CKEDITOR.replace( 'editor1' ); </script>
+        <script> CKEDITOR.replace( 'editor2' ); </script>
+        <script> CKEDITOR.replace( 'editor3' ); </script>
+
+
+    </body>
+</html>
+
+go to HomeController
+
+change to 
+
+ <?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class DashboardController extends Controller
+{
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function index()
+    {
+        return view('dashboard');
+    }
+}
+
+
+
+changinf to home to dashboard
+ only one line to change. 
+Go to 'Providers' folder => RouteServicesProvider.php => then change  line 24 to => public const HOME = '/dashboard';
+
+
+go to routes
+change to Route::get('/dashboard', 'DashboardController@index');
+
+change name home.blade.php to dashboard.blade.php
+
+dashboard.blade.php
+add
+
+<div class="panel-body">
+     <a href="/posts/create" class="btn btn-primary">Create Post</a>
+
+         <h3>Your Post</h3>
+
+
+
+</div>
+    
+
+    
+
+
+
+
+type at cmd for post has user id
+    php artisan make:migration add_user_id_to_posts
+
+go to add_user_id_to_posts 
+add
+     $table->integer('user_id');
+     $table->dropColumn('usre_id');
+
+
+public function up()
+    {
+        Schema::table('posts', function (Blueprint $table) {
+            $table->integer('user_id');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('posts', function (Blueprint $table) {
+            $table->dropColumn('usre_id');
+        });
+    }
+}
+
+
+type php artisan migrate
+
+
+go to postscontroller
+add at store function
+    auth() is come from authentication
+    $post->user_id =auth()->user()->id;
+
+public function store(Request $request)
+    {
+        $this->validate($request,[
+            'title' => 'required',
+            'description' => 'required',
+            'salary_hr' => 'required',
+            'type' => 'required',
+            'required_skills' => 'required',
+            'company_name' => 'required',
+            'company_description' => 'required',
+            'city' => 'required',
+            
+        ]);
+        
+        // create Post
+        $post = new Post;
+        $post->title = $request->input('title');
+        $post->description = $request->input('description');
+        $post->user_id =auth()->user()->id;
+        // if its integer how to change?
+        $post->salary_hr = $request->input('salary_hr');
+        $post->type = $request->input('type');
+        $post->required_skills = $request->input('required_skills');
+        $post->company_name = $request->input('company_name');
+        $post->company_description = $request->input('company_description');
+        $post->city = $request->input('city');
+        $post->save();
+
+        return redirect('/posts')->with('success', 'Job Post Created');
+
+    }
+
+
+
+
+go to navbar
+add link
+      <a class="dropdown-item" href="/dashboard">Dashboard</a>
+
+
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url('/') }}">
+            {{ config('app.name', 'Laravel') }}
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <!-- Left Side Of Navbar -->
+            <ul class="navbar-nav mr-auto  ">
+              <li class="nav-item">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/about">About</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="/services">Services</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="/posts"> Job Posts</a>
+              </li>
+            
+
+
+            </ul>
+
+           
+
+           
+
+            <!-- Right Side Of Navbar -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Authentication Links -->
+                @guest
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                    </li>
+                    @if (Route::has('register'))
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                        </li>
+                    @endif
+                @else
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ Auth::user()->name }}
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+-----------------------------------------------------------------------------------------------------------------                        
+                             <a class="dropdown-item" href="/dashboard">Dashboard</a>
+                        
+                            <a class="dropdown-item" href="{{ route('logout') }}"
+                               onclick="event.preventDefault();
+                                             document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a>
+
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </div>
+                    </li>
+                @endguest
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+
+
+
+
+
+
+

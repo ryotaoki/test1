@@ -1,0 +1,42 @@
+step 5 
+create postscontroller php artisan make:contorller name
+create make a model and migration
+php artisan make:model Post -m
+add 
+$table->id();
+            $table->string('title');
+            $table->mediumText('description');
+            $table->integer('salary/hr');
+            $table->string('type');
+            $table->mediumText('required_skills');
+            $table->mediumText('company_name');
+            $table->mediumText('company_description');
+            $table->mediumText('city');
+
+add maxium length
+go to provider/appserviceprovide.php
+add
+use Illuminate\Support\Facades\Schema;
+
+ public function boot()
+    {
+        Schema::defaultStringlength(300);
+    }
+
+type 
+php artisan migrate
+
+delete postscontroller
+add php artisan make:controller PostsController --resource
+now it has all EROM
+
+go to route
+add 
+
+Route::resource('posts','PostsController');
+
+
+type 
+php artisan route:list 
+to show all the route list
+
